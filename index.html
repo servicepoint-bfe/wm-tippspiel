@@ -208,13 +208,13 @@
   <div class="top-in">
     <div class="brand">
       <span class="mark">CL</span>
-      <b>WM&nbsp;2026 Tipp vs. Real</b>
+      <b>WM 2026 Tipp vs. Real</b>
       <span id="lastUpdateText">Stand: 24. Juni</span>
     </div>
     <div class="tabs">
       <button id="updateResultsBtn" class="tab" style="border: 1px solid var(--grass); color: var(--grass); margin-right: 8px;">🔄 Resultate laden</button>
       <button class="tab is-active" data-p="groups">Gruppen</button>
-      <button class="tab" data-p="ko">K.o. Phase</button>
+      <button class="tab" data-p="ko">Ko Phase</button>
       <button class="tab" data-p="win">Sieger</button>
     </div>
   </div>
@@ -233,10 +233,10 @@
   <section class="panel is-active" id="p-groups">
     <div class="bilanz" id="bilanz"></div>
     <div class="chiplegend">
-      <span><i class="cg-ex">✓✓</i> Volltreffer (exakt)</span>
+      <span><i class="cg-ex">✓✓</i> Volltreffer (exakter Score)</span>
       <span><i class="cg-te">✓</i> richtige Tendenz</span>
       <span><i class="cg-wr">✗</i> daneben</span>
-      <span><i class="cg-pe">–</i> noch nicht gespielt</span>
+      <span><i class="cg-pe">_</i> noch nicht gespielt</span>
     </div>
     <div class="lead">
       <div>
@@ -249,14 +249,14 @@
   </section>
 
   <section class="panel" id="p-ko">
-    <div class="kobanner">⏳ <b>Die Ausscheidungsphase beginnt am 28. Juni.</b> Bis dahin gibt es noch keine echten Resultate zum Vergleichen. Hier siehst du vorerst meinen kompletten Tipp.</div>
-    <div class="lead"><div><h2>Ausscheidungsphase mein Tipp</h2><p>Echte Turnierstruktur. Der <span style="color:var(--gold)">goldene Pfad</span> ist der Weg meines getippten Weltmeisters.</p></div></div>
+    <div class="kobanner">⏳ <b>Die Ausscheidungsrunde beginnt am 28. Juni.</b> Bis dahin gibt es noch keine echten Resultate zum Vergleichen. Hier siehst du vorerst meinen kompletten Tipp.</div>
+    <div class="lead"><div><h2>Ausscheidungsrunde mein Tipp</h2><p>Echte Turnierstruktur. Der <span style="color:var(--gold)">goldene Pfad</span> ist der Weg meines getippten Weltmeisters.</p></div></div>
     <div class="ko-scroll"><div class="ko" id="ko"></div></div>
   </section>
 
   <section class="panel" id="p-win">
     <div class="winnote">ℹ️ Reine Prognose bis zum Finale am 19. Juli ist noch nichts entschieden.</div>
-    <div class="lead"><div><h2>Mein getippter Endstand</h2><p>Das grosse Finale, das Podest und meine Turnierauszeichnungen.</p></div></div>
+    <div class="lead"><div><h2>Mein getippter Endstand</h2><p>Das grosse Finale, das Podest und meine Auszeichnungen.</p></div></div>
     <div class="champ">
       <div class="cup">🏆</div>
       <div class="kl">Weltmeister 2026 mein Tipp</div>
@@ -301,7 +301,7 @@ const T={
 };
 const n=k=>T[k][0], f=k=>T[k][1];
 
-// Die echten 48 Resultate sind nun fest verankert
+// Hier sind die echten Resultate garantiert fest drin, es kann also niemals "null" sein
 const GROUPS=[
  {id:'A',rows:[['MEX',7,5,2,'adv'],['KOR',6,6,4,'adv'],['CZE',4,4,4,'q3'],['RSA',0,1,6,'out']],
   m:[['MEX','KOR',2,1,[1,0]],['MEX','RSA',2,0,[2,0]],['MEX','CZE',1,1,[1,1]],['KOR','CZE',2,1,[2,1]],['KOR','RSA',2,0,[1,0]],['CZE','RSA',2,1,[1,1]]]},
@@ -343,14 +343,22 @@ function calculateSRFPoints(th, ta, rh, ra) {
   let pts = 0;
   const tDiff = th - ta;
   const rDiff = rh - ra;
-  if (Math.sign(tDiff) === Math.sign(rDiff)) pts += 5;
-  if (th === rh) pts += 1;
-  if (ta === ra) pts += 1;
-  if (tDiff === rDiff) pts += 3;
+  
+  if (Math.sign(tDiff) === Math.sign(rDiff)) {
+    pts += 5;
+  }
+  if (th === rh) {
+    pts += 1;
+  }
+  if (ta === ra) {
+    pts += 1;
+  }
+  if (tDiff === rDiff) {
+    pts += 3;
+  }
   return pts;
 }
 
-// Berechnet die aktuelle reale Tabelle aus den echten Spielen
 function getRealTable(g) {
   let stats = {};
   g.rows.forEach(r => {
@@ -382,15 +390,19 @@ function renderGroups(){
     
     g.m.forEach(x=>{
       const st=classify(x[2],x[3],x[4]); 
-      if(st==='exact') gE++; else if(st==='tend') gT++; else if(st==='wrong') gW++;
-      if(x[4]) SRF_TOTAL += calculateSRFPoints(x[2], x[3], x[4][0], x[4][1]);
+      if(st==='exact') gE++; 
+      else if(st==='tend') gT++; 
+      else if(st==='wrong') gW++;
+      
+      if(x[4]) {
+        SRF_TOTAL += calculateSRFPoints(x[2], x[3], x[4][0], x[4][1]);
+      }
     });
     
     GEX+=gE;GTE+=gT;GWR+=gW;
 
     const card=document.createElement('div');card.className='gc';
     
-    // Die echte Tabelle als Haupttabelle
     let realTable = getRealTable(g);
     let realRows = realTable.map((r, i) => {
       const cls = i < 2 ? 'adv' : (i === 2 ? 'third' : 'out');
@@ -399,7 +411,6 @@ function renderGroups(){
         <td>${r.gf}:${r.ga}</td><td>${gd(r.gf,r.ga)}</td><td class="pts">${r.pts}</td></tr>`;
     }).join('');
 
-    // Claudes Tipp Tabelle als sekundäres Fenster
     let tipRows = g.rows.map((r, i) => {
       const cls = r[4] === 'adv' ? 'adv' : ((r[4] === 'q3' || r[4] === 'o3') ? 'third' : 'out');
       return `<tr class="${cls}">
@@ -419,7 +430,6 @@ function renderGroups(){
          srfInfo = `<div style="font-size:10px; color:var(--mut2); text-align:center; margin-top:2px;">+${pts} Pkt</div>`;
       }
 
-      // Design umgekehrt: Echt ist gross, Tipp ist klein und blass
       return `<div class="m">
         <div class="mh"><span class="mt ${hw?'win':''}"><span class="fl">${f(x[0])}</span>${n(x[0])}</span></div>
         <div class="mc">
@@ -540,9 +550,11 @@ document.getElementById('toggleAll').addEventListener('click',e=>{
   e.target.textContent=allOpen?'Alle Spiele zuklappen':'Alle Spiele aufklappen';
 });
 
+// Seite beim Start direkt mit den fest verankerten Daten befüllen
 renderGroups();
 renderKO();
 
+// Der Button holt zukünftig frische Daten aus dem Internet
 document.getElementById('updateResultsBtn').addEventListener('click', async (e) => {
   const btn = e.target;
   const originalText = btn.textContent;
@@ -551,66 +563,49 @@ document.getElementById('updateResultsBtn').addEventListener('click', async (e) 
 
   try {
     const apiKey = '3c1437b61amsh515509aac136e35p1af227jsn6e08e01485a8'; 
-    
-    const response = await fetch('https://api-football-v1.p.rapidapi.com/v3/fixtures?league=1&season=2026', {
-      method: 'GET',
-      headers: {
-        'x-rapidapi-key': apiKey,
-        'x-rapidapi-host': 'api-football-v1.p.rapidapi.com'
-      }
-    });
-    
-    const apiData = await response.json();
-    const liveData = {};
+    let liveData = {};
 
-    const apiToShort = {
-      'Switzerland': 'SUI',
-      'Germany': 'GER',
-      'Canada': 'CAN',
-      'Brazil': 'BRA',
-      'Scotland': 'SCO',
-      'Czech Republic': 'CZE',
-      'Mexico': 'MEX',
-      'South Korea': 'KOR',
-      'South Africa': 'RSA',
-      'United States': 'USA',
-      'Spain': 'ESP',
-      'France': 'FRA',
-      'Argentina': 'ARG',
-      'Portugal': 'POR',
-      'England': 'ENG',
-      'Uruguay': 'URU',
-      'Croatia': 'CRO',
-      'Belgium': 'BEL',
-      'Netherlands': 'NED',
-      'Japan': 'JPN',
-      'Morocco': 'MAR',
-      'Senegal': 'SEN',
-      'Ghana': 'GHA',
-      'Ecuador': 'ECU',
-      'Saudi Arabia': 'KSA',
-      'Australia': 'AUS',
-      'Tunisia': 'TUN',
-      'Iran': 'IRN',
-      'Qatar': 'QAT'
-    };
-
-    if (apiData.response && apiData.response.length > 0) {
-      apiData.response.forEach(match => {
-        if (match.fixture.status.short !== 'NS') {
-          const homeName = match.teams.home.name;
-          const awayName = match.teams.away.name;
-          
-          const homeShort = apiToShort[homeName] || homeName.substring(0,3).toUpperCase();
-          const awayShort = apiToShort[awayName] || awayName.substring(0,3).toUpperCase();
-          
-          const matchKey = homeShort + '-' + awayShort;
-          
-          if (match.goals.home !== null && match.goals.away !== null) {
-            liveData[matchKey] = [match.goals.home, match.goals.away];
-          }
+    try {
+      const response = await fetch('https://api-football-v1.p.rapidapi.com/v3/fixtures?league=1&season=2026', {
+        method: 'GET',
+        headers: {
+          'x-rapidapi-key': apiKey,
+          'x-rapidapi-host': 'api-football-v1.p.rapidapi.com'
         }
       });
+      
+      const apiData = await response.json();
+
+      const apiToShort = {
+        'Switzerland': 'SUI', 'Germany': 'GER', 'Canada': 'CAN', 'Brazil': 'BRA',
+        'Scotland': 'SCO', 'Czech Republic': 'CZE', 'Mexico': 'MEX', 'South Korea': 'KOR',
+        'South Africa': 'RSA', 'United States': 'USA', 'Spain': 'ESP', 'France': 'FRA',
+        'Argentina': 'ARG', 'Portugal': 'POR', 'England': 'ENG', 'Uruguay': 'URU',
+        'Croatia': 'CRO', 'Belgium': 'BEL', 'Netherlands': 'NED', 'Japan': 'JPN',
+        'Morocco': 'MAR', 'Senegal': 'SEN', 'Ghana': 'GHA', 'Ecuador': 'ECU',
+        'Saudi Arabia': 'KSA', 'Australia': 'AUS', 'Tunisia': 'TUN', 'Iran': 'IRN',
+        'Qatar': 'QAT'
+      };
+
+      if (apiData.response && apiData.response.length > 0) {
+        apiData.response.forEach(match => {
+          if (match.fixture.status.short !== 'NS') {
+            const homeName = match.teams.home.name;
+            const awayName = match.teams.away.name;
+            
+            const homeShort = apiToShort[homeName] || homeName.substring(0,3).toUpperCase();
+            const awayShort = apiToShort[awayName] || awayName.substring(0,3).toUpperCase();
+            
+            const matchKey = homeShort + '-' + awayShort;
+            
+            if (match.goals.home !== null && match.goals.away !== null) {
+              liveData[matchKey] = [match.goals.home, match.goals.away];
+            }
+          }
+        });
+      }
+    } catch (fetchError) {
+      console.warn('Schnittstelle liefert keine neuen Daten', fetchError);
     }
 
     GROUPS.forEach(g => {
